@@ -6,7 +6,6 @@ import {
   flexRender,
 } from '@tanstack/react-table';
 import {
-  Card,
   Table,
   TableHeader,
   TableBody,
@@ -164,10 +163,10 @@ export function AlertsTable({
   };
 
   return (
-    <Card className="border border-border/30 bg-card/30 backdrop-blur-md shadow-lg overflow-hidden">
+    <div className="w-full">
       <div className="relative">
         <Table>
-          <TableHeader className="bg-muted/40 border-b border-border/30">
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => {
@@ -180,11 +179,10 @@ export function AlertsTable({
                       onClick={() =>
                         isSortable && handleSortClick(header.column.id)
                       }
-                      className={`py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-muted-foreground ${
-                        isSortable
+                      className={`py-3.5 px-4 font-bold text-xs uppercase tracking-wider text-muted-foreground ${isSortable
                           ? 'cursor-pointer select-none hover:bg-muted/65 transition-all text-foreground'
                           : ''
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-1.5">
                         {flexRender(
@@ -352,11 +350,10 @@ export function AlertsTable({
                     variant={filters.page === pageNum ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => setFilters((prev) => ({ ...prev, page: pageNum }))}
-                    className={`h-8 w-8 rounded-lg text-xs font-bold ${
-                      filters.page === pageNum
+                    className={`h-8 w-8 rounded-lg text-xs font-bold ${filters.page === pageNum
                         ? 'shadow-sm'
                         : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
-                    }`}
+                      }`}
                   >
                     {pageNum}
                   </Button>
@@ -379,6 +376,6 @@ export function AlertsTable({
           </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 }
