@@ -1,7 +1,15 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { Router, Request, Response } from 'express';
+import { requireAuth } from '../middleware/auth.js';
+import { prisma } from '../lib/prisma.js';
 
-export async function GET() {
+const router = Router();
+
+/**
+ * GET /api/dashboard
+ * Returns aggregated dashboard statistics: counts, severity/status/category
+ * distributions, and alerts-over-time timeline data.
+ */
+router.get('/', requireAuth, async (_req: Request, res: Response) => {
   try {
     const [
       totalAlerts,
@@ -105,7 +113,7 @@ export async function GET() {
       .map(([date, count]) => ({ date, count }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
-    return NextResponse.json({
+    res.json({
       totalAlerts,
       criticalAlerts,
       investigatingAlerts,
@@ -117,9 +125,8 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Error fetching dashboard statistics:', error);
-    return NextResponse.json(
-      { error: 'An unexpected error occurred while fetching dashboard statistics' },
-      { status: 500 }
-    );
+    res.status(500).json({ error: 'An unexpected error occurred while fetching dashboard statistics' });
   }
-}
+});
+
+export { router as dashboardRouter };

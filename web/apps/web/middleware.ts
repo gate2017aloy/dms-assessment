@@ -3,24 +3,20 @@ import type { NextRequest } from 'next/server';
 import { verifyJWT } from '@/lib/auth';
 import {
   isProtectedRoute,
-  isProtectedApiRoute,
   redirectToLogin,
   redirectToDashboard,
-  unauthorizedApiResponse,
 } from '@/lib/middleware-utils';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('auth_token')?.value;
 
-  // 1. Auth Guard for Protected Pages and API Routes
-  if (isProtectedRoute(pathname) || isProtectedApiRoute(pathname)) {
+  // 1. Auth Guard for Protected Pages (API routes are now handled by Express)
+  if (isProtectedRoute(pathname)) {
     const payload = token ? await verifyJWT(token) : null;
 
     if (!payload) {
-      return isProtectedApiRoute(pathname)
-        ? unauthorizedApiResponse()
-        : redirectToLogin(request, pathname);
+      return redirectToLogin(request, pathname);
     }
   }
 
@@ -41,8 +37,6 @@ export const config = {
     '/dashboard/:path*',
     '/alerts',
     '/alerts/:path*',
-    '/api/:path*',
     '/login',
   ],
 };
-

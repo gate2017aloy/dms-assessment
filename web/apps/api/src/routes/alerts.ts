@@ -1,7 +1,10 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { Router, Request, Response } from 'express';
+import { requireAuth } from '../middleware/auth.js';
+import { prisma } from '../lib/prisma.js';
 import { z } from 'zod';
 import { Severity, Status, Category, Prisma } from '@prisma/client';
+
+const router = Router();
 
 // Define the query parameter validation schema using Zod
 const GetAlertsQuerySchema = z.object({
@@ -21,33 +24,37 @@ const GetAlertsQuerySchema = z.object({
   endDate: z.string().optional(),
 });
 
-export async function GET(request: Request) {
+// Define the validation schema for updating an alert.
+const PatchAlertSchema = z.object({
+  status: z.nativeEnum(Status).optional(),
+  severity: z.nativeEnum(Severity).optional(),
+  assignee: z.string().nullable().optional(),
+}).strict().refine((data) => {
+  return data.status !== undefined || data.severity !== undefined || data.assignee !== undefined;
+}, {
+  message: "At least one of 'status', 'severity', or 'assignee' must be provided for update",
+});
+
+/**
+ * GET /api/alerts
+ * Lists alerts with pagination, filtering, sorting, and search.
+ */
+router.get('/', requireAuth, async (req: Request, res: Response) => {
   try {
-    const url = new URL(request.url);
-    
-    // Extract query parameters from URL
+    // Express parses query params; map 'q' alias to 'search'
     const queryParams = {
-      page: url.searchParams.get('page') ?? undefined,
-      limit: url.searchParams.get('limit') ?? undefined,
-      severity: url.searchParams.get('severity') ?? undefined,
-      status: url.searchParams.get('status') ?? undefined,
-      category: url.searchParams.get('category') ?? undefined,
-      sort: url.searchParams.get('sort') ?? undefined,
-      search: url.searchParams.get('search') ?? url.searchParams.get('q') ?? undefined,
-      startDate: url.searchParams.get('startDate') ?? undefined,
-      endDate: url.searchParams.get('endDate') ?? undefined,
+      ...req.query,
+      search: req.query.search || req.query.q || undefined,
     };
 
     // Validate using Zod
     const parsed = GetAlertsQuerySchema.safeParse(queryParams);
     if (!parsed.success) {
-      return NextResponse.json(
-        { 
-          error: 'Validation error', 
-          details: parsed.error.flatten().fieldErrors 
-        },
-        { status: 400 }
-      );
+      res.status(400).json({
+        error: 'Validation error',
+        details: parsed.error.flatten().fieldErrors,
+      });
+      return;
     }
 
     const { page, limit, severity, status, category, sort, search, startDate, endDate } = parsed.data;
@@ -144,7 +151,7 @@ export async function GET(request: Request) {
 
     const totalPages = Math.max(1, Math.ceil(total / limit));
 
-    return NextResponse.json({
+    res.json({
       data: alerts,
       total,
       page,
@@ -152,9 +159,84 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error('Error fetching alerts:', error);
-    return NextResponse.json(
-      { error: 'An unexpected error occurred while fetching alerts' },
-      { status: 500 }
-    );
+    res.status(500).json({ error: 'An unexpected error occurred while fetching alerts' });
   }
-}
+});
+
+/**
+ * GET /api/alerts/:id
+ * Returns a single alert.
+ */
+router.get('/:id', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(400).json({ error: 'Alert ID is required' });
+      return;
+    }
+
+    const alert = await prisma.alert.findUnique({
+      where: { id },
+    });
+
+    if (!alert) {
+      res.status(404).json({ error: 'Alert not found' });
+      return;
+    }
+
+    res.json(alert);
+  } catch (error) {
+    console.error(`Error fetching alert with ID:`, error);
+    res.status(500).json({ error: 'An unexpected error occurred while fetching the alert' });
+  }
+});
+
+/**
+ * PATCH /api/alerts/:id
+ * Updates status, severity, and/or assignee of an alert.
+ */
+router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(400).json({ error: 'Alert ID is required' });
+      return;
+    }
+
+    // Validate the request payload with Zod
+    const parsed = PatchAlertSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({
+        error: 'Validation error',
+        details: parsed.error.flatten().fieldErrors,
+        globalErrors: parsed.error.flatten().formErrors,
+      });
+      return;
+    }
+
+    // First check if the alert exists
+    const alertExists = await prisma.alert.findUnique({
+      where: { id },
+    });
+
+    if (!alertExists) {
+      res.status(404).json({ error: 'Alert not found' });
+      return;
+    }
+
+    // Perform the update
+    const updatedAlert = await prisma.alert.update({
+      where: { id },
+      data: parsed.data,
+    });
+
+    res.json(updatedAlert);
+  } catch (error) {
+    console.error(`Error updating alert with ID:`, error);
+    res.status(500).json({ error: 'An unexpected error occurred while updating the alert' });
+  }
+});
+
+export { router as alertsRouter };

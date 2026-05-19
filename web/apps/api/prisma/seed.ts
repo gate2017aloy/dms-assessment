@@ -1,8 +1,6 @@
 import { PrismaClient, Severity, Status, Category } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
-
 const HOSTNAMES = [
   'finance-laptop-22', 'dev-workstation-89', 'hr-pc-04', 'sales-macbook-15',
   'prod-db-master', 'web-server-01', 'auth-service-pod', 'corp-mail-server',
@@ -33,7 +31,6 @@ const DOMAINS = [
 function getRandomElement<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)] as T;
 }
-
 
 function getRandomIP(): string {
   return getRandomElement(IPS);
@@ -338,7 +335,14 @@ function getAffectedAsset(category: Category, hostname: string, user: string, ip
   return Math.random() > 0.5 ? ip : hostname;
 }
 
-async function main() {
+/**
+ * Seed function exported for use by the Express server on startup.
+ * With in-memory SQLite, this runs every time the server starts.
+ */
+export async function seed(prisma: PrismaClient) {
+  console.log('🌱 Seeding in-memory database...');
+
+  // Clean up any existing data (idempotent startup)
   console.log('Cleaning up existing data...');
   await prisma.alert.deleteMany();
   await prisma.user.deleteMany();
@@ -403,14 +407,18 @@ async function main() {
     });
   }
 
-  console.log('Seeding completed successfully!');
+  console.log('✅ Seeding completed successfully!');
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+// Allow running as a standalone script
+if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
+  const prisma = new PrismaClient();
+  seed(prisma)
+    .catch((e) => {
+      console.error(e);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
