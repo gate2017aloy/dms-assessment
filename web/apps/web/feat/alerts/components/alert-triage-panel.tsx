@@ -32,14 +32,14 @@ export function AlertTriagePanel({
   return (
     <div className="space-y-6">
       {/* Analyst Assignment Card */}
-      <Card className="bg-card/25 border-border/40 shadow-sm overflow-hidden">
-        <CardHeader className="bg-muted/30 border-b border-border/30 px-5 py-4">
-          <CardTitle className="text-sm font-bold tracking-wide uppercase text-muted-foreground flex items-center gap-2">
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>
             <User className="h-4 w-4 text-primary" />
             Incident Ownership
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-5 space-y-4">
+        <CardContent className="space-y-4 pb-1">
           {alert.assignee ? (
             <div className="space-y-3">
               <div className="flex items-center gap-2.5 p-3 rounded-lg bg-accent/40 border border-border/30">
@@ -84,14 +84,14 @@ export function AlertTriagePanel({
       </Card>
 
       {/* Incident Triage Action Card */}
-      <Card className="bg-card/25 border-border/40 shadow-sm overflow-hidden">
-        <CardHeader className="bg-muted/30 border-b border-border/30 px-5 py-4">
-          <CardTitle className="text-sm font-bold tracking-wide uppercase text-muted-foreground flex items-center gap-2">
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>
             <Activity className="h-4 w-4 text-primary" />
             SIEM Triage Controls
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-5 space-y-4">
+        <CardContent className="space-y-4 pb-1">
           
           {/* Status Update Trigger */}
           <div className="space-y-1.5">

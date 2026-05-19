@@ -12,14 +12,14 @@ export function AlertTelemetry({ alert }: AlertTelemetryProps) {
   return (
     <div className="space-y-6">
       {/* Telemetry Metadata Card */}
-      <Card className="bg-card/25 border-border/40 shadow-sm overflow-hidden">
-        <CardHeader className="bg-muted/30 border-b border-border/30 px-5 py-4">
-          <CardTitle className="text-sm font-bold tracking-wide uppercase text-muted-foreground flex items-center gap-2">
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>
             <Server className="h-4 w-4 text-primary" />
             Incident Source Telemetry
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-1">
           <div className="space-y-1">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Affected Asset</span>
             <div className="flex items-center gap-2 font-medium text-foreground">
@@ -56,9 +56,9 @@ export function AlertTelemetry({ alert }: AlertTelemetryProps) {
       </Card>
 
       {/* Raw Event Codeblock Inspector */}
-      <Card className="bg-card/25 border-border/40 shadow-sm overflow-hidden">
-        <CardHeader className="bg-muted/30 border-b border-border/30 px-5 py-4 flex flex-row items-center justify-between">
-          <CardTitle className="text-sm font-bold tracking-wide uppercase text-muted-foreground flex items-center gap-2">
+      <Card className="pb-0">
+        <CardHeader className="border-b">
+          <CardTitle>
             <Terminal className="h-4 w-4 text-emerald-500" />
             Raw Event Telemetry JSON
           </CardTitle>
