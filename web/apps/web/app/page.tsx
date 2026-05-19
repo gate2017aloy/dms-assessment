@@ -1,5 +1,4 @@
-import { Button } from "@workspace/ui/components/button"
-import { Card } from "@workspace/ui/components/card"
+import { Card, Button } from "@workspace/ui"
 
 export default function Page() {
   return (
