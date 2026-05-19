@@ -11,7 +11,7 @@ import {
   SelectContent,
   SelectItem
 } from '@workspace/ui';
-import { User, Activity, Loader2, UserCheck } from 'lucide-react';
+import { User, Activity, Loader2, UserCheck, XCircle } from 'lucide-react';
 import type { Alert } from '../types';
 
 interface AlertTriagePanelProps {
@@ -39,7 +39,7 @@ export function AlertTriagePanel({
             Incident Ownership
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 pb-1">
+        <CardContent className="space-y-4 pb-4">
           {alert.assignee ? (
             <div className="space-y-3">
               <div className="flex items-center gap-2.5 p-3 rounded-lg bg-accent/40 border border-border/30">
@@ -91,7 +91,7 @@ export function AlertTriagePanel({
             SIEM Triage Controls
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 pb-1">
+        <CardContent className="space-y-4 pb-4 pt-4">
           
           {/* Status Update Trigger */}
           <div className="space-y-1.5">
@@ -132,6 +132,19 @@ export function AlertTriagePanel({
                 <SelectItem value="info">Info / Informational</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Dismiss Action */}
+          <div className="pt-4 border-t border-border/40 mt-4">
+             <Button
+                variant="outline"
+                onClick={() => handleTriageUpdate('status', 'false_positive')}
+                disabled={isUpdating || alert.status === 'false_positive'}
+                className="w-full text-xs font-semibold bg-red-500/10 text-red-500 hover:bg-red-500/20 border-red-500/20 hover:border-red-500/30 gap-1.5 h-9"
+              >
+                <XCircle className="h-4 w-4" />
+                Mark as False Positive
+             </Button>
           </div>
         </CardContent>
       </Card>
