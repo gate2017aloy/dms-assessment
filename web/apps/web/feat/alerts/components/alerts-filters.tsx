@@ -11,7 +11,7 @@ import {
   Button,
 } from '@workspace/ui';
 import { Search, RotateCcw, Calendar, Filter } from 'lucide-react';
-import { categoryLabels } from '../constants';
+import { CATEGORY_CONFIG } from '@/lib/constants';
 import type { AlertsFilterState } from '../types';
 
 interface AlertsFiltersProps {
@@ -105,9 +105,9 @@ export function AlertsFilters({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {Object.entries(categoryLabels).map(([key, label]) => (
+                {Object.entries(CATEGORY_CONFIG).map(([key, config]) => (
                   <SelectItem key={key} value={key}>
-                    {label}
+                    {config.label}
                   </SelectItem>
                 ))}
               </SelectContent>

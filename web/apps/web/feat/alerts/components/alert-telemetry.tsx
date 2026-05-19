@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@workspace/ui';
 import { Server, Terminal, Clock, FileCode, Tag } from 'lucide-react';
-import { categoryLabels } from '../constants';
+import { CATEGORY_CONFIG } from '@/lib/constants';
 import type { Alert } from '../types';
 
 interface AlertTelemetryProps {
@@ -41,7 +41,7 @@ export function AlertTelemetry({ alert }: AlertTelemetryProps) {
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Incident Category</span>
             <div className="text-foreground font-medium flex items-center gap-1.5">
               <Tag className="h-3.5 w-3.5 text-muted-foreground" />
-              {categoryLabels[alert.category] || alert.category}
+              {CATEGORY_CONFIG[alert.category as keyof typeof CATEGORY_CONFIG]?.label || alert.category}
             </div>
           </div>
 

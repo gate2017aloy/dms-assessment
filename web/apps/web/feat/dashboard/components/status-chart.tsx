@@ -11,7 +11,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { CustomTooltip, STATUS_COLORS } from './shared';
+import { CustomTooltip, STATUS_CONFIG } from './shared';
 
 interface StatusChartProps {
   isLoading: boolean;
@@ -72,7 +72,7 @@ export function StatusChart({
                 {statusDistribution.map((entry) => (
                   <Cell
                     key={`cell-${entry.name}`}
-                    fill={STATUS_COLORS[entry.name] || '#64748b'}
+                    fill={STATUS_CONFIG[entry.name as keyof typeof STATUS_CONFIG]?.colorHex || '#64748b'}
                     className="hover:opacity-85 transition-opacity"
                   />
                 ))}

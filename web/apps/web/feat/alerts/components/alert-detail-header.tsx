@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@workspace/ui';
 import { ArrowLeft } from 'lucide-react';
-import { severityConfig, statusConfig } from '../constants';
+import { SEVERITY_CONFIG as severityConfig, STATUS_CONFIG as statusConfig } from '@/lib/constants';
 import type { Alert } from '../types';
 
 interface AlertDetailHeaderProps {

@@ -26,7 +26,7 @@ import {
   Filter,
   UserCheck,
 } from 'lucide-react';
-import { severityConfig, statusConfig, categoryLabels } from '../constants';
+import { SEVERITY_CONFIG as severityConfig, STATUS_CONFIG as statusConfig, CATEGORY_CONFIG } from '@/lib/constants';
 import type { Alert, AlertsFilterState } from '../types';
 
 interface AlertsTableProps {
@@ -85,7 +85,7 @@ export function AlertsTable({
         header: 'Category',
         cell: (info) => (
           <span className="text-muted-foreground text-sm font-medium">
-            {categoryLabels[info.getValue()] || info.getValue()}
+            {CATEGORY_CONFIG[info.getValue() as keyof typeof CATEGORY_CONFIG]?.label || info.getValue()}
           </span>
         ),
       }),

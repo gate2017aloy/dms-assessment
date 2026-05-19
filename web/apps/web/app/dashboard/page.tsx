@@ -1,12 +1,8 @@
 import React from 'react';
 import { Dashboard } from '@/feat/dashboard';
+import { NextPageProps } from '@/types';
 
-interface PageProps {
-  params: Promise<any>;
-  searchParams: Promise<any>;
-}
-
-export default async function DashboardPage(props: PageProps) {
+export default async function DashboardPage(props: NextPageProps) {
   const params = await props.params;
   const searchParams = await props.searchParams;
 

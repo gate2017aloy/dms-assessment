@@ -11,7 +11,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { CustomTooltip, CATEGORY_COLORS } from './shared';
+import { CustomTooltip, CATEGORY_CONFIG } from './shared';
 
 interface CategoryChartProps {
   isLoading: boolean;
@@ -75,7 +75,7 @@ export function CategoryChart({
                 {categoryDistribution.map((entry) => (
                   <Cell
                     key={`cell-${entry.name}`}
-                    fill={CATEGORY_COLORS[entry.name] || '#64748b'}
+                    fill={CATEGORY_CONFIG[entry.name as keyof typeof CATEGORY_CONFIG]?.colorHex || '#64748b'}
                     className="hover:opacity-85 transition-opacity"
                   />
                 ))}

@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { CustomTooltip, SEVERITY_COLORS } from './shared';
+import { CustomTooltip, SEVERITY_CONFIG } from './shared';
 
 interface SeverityChartProps {
   isLoading: boolean;
@@ -59,7 +59,7 @@ export function SeverityChart({
                 {severityDistribution.map((entry) => (
                   <Cell
                     key={`cell-${entry.name}`}
-                    fill={SEVERITY_COLORS[entry.name] || '#64748b'}
+                    fill={SEVERITY_CONFIG[entry.name as keyof typeof SEVERITY_CONFIG]?.colorHex || '#64748b'}
                     className="hover:opacity-85 transition-opacity"
                   />
                 ))}

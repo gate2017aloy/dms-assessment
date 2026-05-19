@@ -1,11 +1,7 @@
 import { Alerts } from '@feat/alerts';
+import { NextPageProps } from '@/types';
 
-interface PageProps {
-  params: Promise<any>;
-  searchParams: Promise<any>;
-}
-
-export default async function AlertsPage(props: PageProps) {
+export default async function AlertsPage(props: NextPageProps) {
   const params = await props.params;
   const searchParams = await props.searchParams;
 
