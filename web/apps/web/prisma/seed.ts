@@ -31,8 +31,9 @@ const DOMAINS = [
 ];
 
 function getRandomElement<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
+  return arr[Math.floor(Math.random() * arr.length)] as T;
 }
+
 
 function getRandomIP(): string {
   return getRandomElement(IPS);
