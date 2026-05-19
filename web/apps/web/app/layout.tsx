@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 
 import "@workspace/ui/globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { QueryProvider } from "@/components/query-provider"
 import { AppLayout } from "@/components/app-layout"
 import { cn } from "@workspace/ui/lib/utils"
 
@@ -30,7 +31,9 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <AppLayout>{children}</AppLayout>
+          <QueryProvider>
+            <AppLayout>{children}</AppLayout>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>

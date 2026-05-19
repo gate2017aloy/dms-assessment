@@ -1,5 +1,4 @@
-import React from 'react';
-import { Alerts } from '@/feat/alerts';
+import { Alerts } from '@feat/alerts';
 
 interface PageProps {
   params: Promise<any>;
