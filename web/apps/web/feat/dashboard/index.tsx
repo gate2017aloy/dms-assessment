@@ -1,9 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import React from 'react';
 import {
   Card,
   CardHeader,
@@ -40,17 +37,7 @@ import {
   Area,
   Legend,
 } from 'recharts';
-
-interface DashboardData {
-  totalAlerts: number;
-  criticalAlerts: number;
-  investigatingAlerts: number;
-  falsePositives: number;
-  severityDistribution: { name: string; value: number }[];
-  statusDistribution: { name: string; value: number }[];
-  categoryDistribution: { name: string; value: number }[];
-  alertsOverTime: { date: string; count: number }[];
-}
+import { useDashboard } from './use-dashboard';
 
 // Custom Tooltip component for premium look
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -98,21 +85,22 @@ interface DashboardProps {
 }
 
 export function Dashboard({ params, searchParams }: DashboardProps) {
-  const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const { data, isLoading, isError, refetch } = useQuery<DashboardData>({
-    queryKey: ['dashboardStats'],
-    queryFn: async () => {
-      const response = await axios.get('/api/dashboard');
-      return response.data;
-    },
-    refetchInterval: 30000, // auto-refresh every 30s for real-time security dashboard feeling
-  });
+  const {
+    router,
+    isLoading,
+    isError,
+    refetch,
+    mounted,
+    handleDeepLink,
+    totalAlerts,
+    criticalAlerts,
+    investigatingAlerts,
+    falsePositives,
+    severityDistribution,
+    statusDistribution,
+    categoryDistribution,
+    alertsOverTime,
+  } = useDashboard();
 
   if (isError) {
     return (
@@ -126,22 +114,6 @@ export function Dashboard({ params, searchParams }: DashboardProps) {
       </main>
     );
   }
-
-  // Deep linking helper
-  const handleDeepLink = (type: string, value: string) => {
-    let url = '/alerts';
-    if (type === 'severity') {
-      url = `/alerts?severity=${value}`;
-    } else if (type === 'status') {
-      url = `/alerts?status=${value}`;
-    } else if (type === 'category') {
-      url = `/alerts?category=${value}`;
-    } else if (type === 'date') {
-      // Filter for the entire day
-      url = `/alerts?startDate=${value}T00:00:00.000Z&endDate=${value}T23:59:59.999Z`;
-    }
-    router.push(url);
-  };
 
   return (
     <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-500">
@@ -188,7 +160,7 @@ export function Dashboard({ params, searchParams }: DashboardProps) {
               {isLoading ? (
                 <Skeleton className="h-9 w-20" />
               ) : (
-                data?.totalAlerts.toLocaleString()
+                totalAlerts.toLocaleString()
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
@@ -217,7 +189,7 @@ export function Dashboard({ params, searchParams }: DashboardProps) {
               {isLoading ? (
                 <Skeleton className="h-9 w-12" />
               ) : (
-                data?.criticalAlerts.toLocaleString()
+                criticalAlerts.toLocaleString()
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
@@ -246,7 +218,7 @@ export function Dashboard({ params, searchParams }: DashboardProps) {
               {isLoading ? (
                 <Skeleton className="h-9 w-12" />
               ) : (
-                data?.investigatingAlerts.toLocaleString()
+                investigatingAlerts.toLocaleString()
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
@@ -275,7 +247,7 @@ export function Dashboard({ params, searchParams }: DashboardProps) {
               {isLoading ? (
                 <Skeleton className="h-9 w-12" />
               ) : (
-                data?.falsePositives.toLocaleString()
+                falsePositives.toLocaleString()
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
@@ -303,7 +275,7 @@ export function Dashboard({ params, searchParams }: DashboardProps) {
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsPieChart>
                   <Pie
-                    data={data?.severityDistribution}
+                    data={severityDistribution}
                     cx="50%"
                     cy="50%"
                     innerRadius={65}
@@ -318,7 +290,7 @@ export function Dashboard({ params, searchParams }: DashboardProps) {
                       }
                     }}
                   >
-                    {data?.severityDistribution.map((entry) => (
+                    {severityDistribution.map((entry) => (
                       <Cell
                         key={`cell-${entry.name}`}
                         fill={SEVERITY_COLORS[entry.name] || '#64748b'}
@@ -339,10 +311,10 @@ export function Dashboard({ params, searchParams }: DashboardProps) {
               </ResponsiveContainer>
             )}
             {/* Center HUD count */}
-            {!isLoading && data && (
+            {!isLoading && totalAlerts > 0 && (
               <div className="absolute flex flex-col items-center justify-center pointer-events-none">
                 <span className="text-2xl font-black text-foreground tabular-nums">
-                  {data.totalAlerts}
+                  {totalAlerts}
                 </span>
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                   ALERTS
@@ -371,7 +343,7 @@ export function Dashboard({ params, searchParams }: DashboardProps) {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsBarChart
-                  data={data?.statusDistribution}
+                  data={statusDistribution}
                   layout="vertical"
                   margin={{ top: 10, right: 20, left: 10, bottom: 5 }}
                 >
@@ -395,7 +367,7 @@ export function Dashboard({ params, searchParams }: DashboardProps) {
                       }
                     }}
                   >
-                    {data?.statusDistribution.map((entry) => (
+                    {statusDistribution.map((entry) => (
                       <Cell
                         key={`cell-${entry.name}`}
                         fill={STATUS_COLORS[entry.name] || '#64748b'}
@@ -428,7 +400,7 @@ export function Dashboard({ params, searchParams }: DashboardProps) {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
-                  data={data?.alertsOverTime}
+                  data={alertsOverTime}
                   margin={{ top: 15, right: 10, left: -15, bottom: 0 }}
                   onClick={(state: any) => {
                     if (state && state.activeLabel) {
@@ -449,7 +421,6 @@ export function Dashboard({ params, searchParams }: DashboardProps) {
                     stroke="#64748b"
                     fontSize={10}
                     tickFormatter={(str) => {
-                      // simple short date format e.g. "May 19"
                       try {
                         const date = new Date(str);
                         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -499,7 +470,7 @@ export function Dashboard({ params, searchParams }: DashboardProps) {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsBarChart
-                  data={data?.categoryDistribution}
+                  data={categoryDistribution}
                   margin={{ top: 15, right: 10, left: -15, bottom: 20 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
@@ -524,7 +495,7 @@ export function Dashboard({ params, searchParams }: DashboardProps) {
                       }
                     }}
                   >
-                    {data?.categoryDistribution.map((entry) => (
+                    {categoryDistribution.map((entry) => (
                       <Cell
                         key={`cell-${entry.name}`}
                         fill={CATEGORY_COLORS[entry.name] || '#64748b'}
