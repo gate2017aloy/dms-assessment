@@ -9,6 +9,7 @@ export interface Alert {
   affectedAsset: string;
   assignee: string | null;
   description: string;
+  rawEvent?: any;
 }
 
 export interface AlertsApiResponse {
