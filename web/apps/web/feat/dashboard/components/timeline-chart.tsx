@@ -64,6 +64,8 @@ export function TimelineChart({
                 dataKey="date"
                 stroke="#64748b"
                 fontSize={10}
+                tickMargin={10}
+                minTickGap={60}
                 tickFormatter={(str) => {
                   try {
                     const date = new Date(str);
