@@ -2,10 +2,15 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button } from '@workspace/ui';
+import { Card, CardHeader, CardDescription, CardContent, Button } from '@workspace/ui';
 import { Shield, AlertTriangle, ShieldCheck, HelpCircle } from 'lucide-react';
 
-export default function DashboardPage() {
+interface DashboardProps {
+  params?: any;
+  searchParams?: any;
+}
+
+export function Dashboard({ params, searchParams }: DashboardProps) {
   const router = useRouter();
 
   return (
