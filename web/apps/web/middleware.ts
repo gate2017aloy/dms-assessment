@@ -1,46 +1,34 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verifyJWT } from '@/lib/auth';
+import {
+  isProtectedRoute,
+  isProtectedApiRoute,
+  redirectToLogin,
+  redirectToDashboard,
+  unauthorizedApiResponse,
+} from '@/lib/middleware-utils';
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const token = request.cookies.get('auth_token')?.value;
 
-  const isProtectedRoute = pathname.startsWith('/dashboard') || pathname.startsWith('/alerts');
-  const isProtectedApiRoute =
-    pathname.startsWith('/api') &&
-    !pathname.startsWith('/api/login') &&
-    !pathname.startsWith('/api/logout');
+  // 1. Auth Guard for Protected Pages and API Routes
+  if (isProtectedRoute(pathname) || isProtectedApiRoute(pathname)) {
+    const payload = token ? await verifyJWT(token) : null;
 
-  if (isProtectedRoute || isProtectedApiRoute) {
-    const token = request.cookies.get('auth_token')?.value;
-
-    if (!token) {
-      if (isProtectedApiRoute) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('from', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-
-    const payload = await verifyJWT(token);
     if (!payload) {
-      if (isProtectedApiRoute) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('from', pathname);
-      return NextResponse.redirect(loginUrl);
+      return isProtectedApiRoute(pathname)
+        ? unauthorizedApiResponse()
+        : redirectToLogin(request, pathname);
     }
   }
 
-  if (pathname === '/login') {
-    const token = request.cookies.get('auth_token')?.value;
-    if (token) {
-      const payload = await verifyJWT(token);
-      if (payload) {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
-      }
+  // 2. Redirect authenticated users away from the login page
+  if (pathname === '/login' && token) {
+    const payload = await verifyJWT(token);
+    if (payload) {
+      return redirectToDashboard(request);
     }
   }
 
@@ -57,3 +45,4 @@ export const config = {
     '/login',
   ],
 };
+
