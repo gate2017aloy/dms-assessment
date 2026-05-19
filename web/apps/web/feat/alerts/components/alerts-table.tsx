@@ -164,7 +164,7 @@ export function AlertsTable({
 
   return (
     <div className="w-full">
-      <div className="relative">
+      <div className="relative overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -266,7 +266,7 @@ export function AlertsTable({
                     </div>
                     <div className="space-y-1">
                       <h4 className="font-semibold text-foreground">
-                        No Incidents Found
+                        No alerts found
                       </h4>
                       <p className="text-xs text-muted-foreground">
                         No telemetry alerts match your current filter parameters or
