@@ -1,0 +1,53 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Severity {
+  info
+  low
+  medium
+  high
+  critical
+}
+
+enum Status {
+  new
+  investigating
+  resolved
+  false_positive
+}
+
+enum Category {
+  malware
+  phishing
+  unauthorized_access
+  data_exfiltration
+  policy_violation
+  suspicious_login
+}
+
+model Alert {
+  id            String   @id @default(uuid())
+  timestamp     DateTime
+  title         String
+  severity      Severity
+  status        Status
+  category      Category
+  source        String
+  affectedAsset String
+  assignee      String?
+  description   String
+  rawEvent      Json
+}
+
+model User {
+  id           String @id @default(uuid())
+  email        String @unique
+  passwordHash String
+  name         String
+}
