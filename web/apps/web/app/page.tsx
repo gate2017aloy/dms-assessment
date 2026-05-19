@@ -1,4 +1,5 @@
 import { Button } from "@workspace/ui/components/button"
+import { Card } from "@workspace/ui/components/card"
 
 export default function Page() {
   return (
@@ -10,9 +11,9 @@ export default function Page() {
           <p>We&apos;ve already added the button component for you.</p>
           <Button className="mt-2">Button</Button>
         </div>
-        <div className="text-muted-foreground font-mono text-xs">
+        <Card>
           (Press <kbd>d</kbd> to toggle dark mode)
-        </div>
+        </Card>
       </div>
     </div>
   )
