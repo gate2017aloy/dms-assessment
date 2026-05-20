@@ -55,7 +55,6 @@ export function AppLayout({ children }: AppLayoutProps) {
           <div className="flex items-center gap-4">
             <div className="text-xs text-muted-foreground text-right hidden sm:block">
               <div className="font-medium text-foreground">Analyst Active</div>
-              <div>clearance_level_1</div>
             </div>
             <Button
               variant="outline"

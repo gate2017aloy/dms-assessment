@@ -2,7 +2,16 @@
   "name": "web",
   "version": "0.0.1",
   "private": true,
-  "scripts": {
+    "scripts": {
+    "build": "pnpm --filter api build",
+    "start": "pnpm --filter api start",
+    "dev:api": "pnpm --filter api dev",
+    "dev:web": "pnpm --filter web dev",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "format": "turbo format",
+    "typecheck": "turbo typecheck"
+  },
     "build": "pnpm --filter api build",
     "start": "pnpm --filter api start",
     "dev": "turbo dev",
