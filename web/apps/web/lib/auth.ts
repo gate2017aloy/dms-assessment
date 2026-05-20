@@ -1,7 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 
 const SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'super-secret-jwt-key-dms-assessment'
+  process.env.JWT_SECRET
 );
 
 export async function signJWT(payload: { userId: string; email: string }) {
