@@ -4,67 +4,66 @@
 
 - **Live Frontend (Vercel):** [https://dms-assessment-git-main-gate2017aloys-projects.vercel.app](https://dms-assessment-git-main-gate2017aloys-projects.vercel.app)
 - **Live Backend (Render):** [https://dms-assessment.onrender.com/](https://dms-assessment.onrender.com/)
-- **Source Repository:** Available in the submitted Git repository (`dms-assessment`).
+- **Source Repository:** Submitted Git repository (`dms-assessment`)
 - **Analyst Credentials:** 
-  - **Email:** `analyst@soc.com`
-  - **Password:** `password123`
+  - Email: `analyst@soc.com`
+  - Password: `password123`
 
 ---
 
-## 1. Architecture & Main Tech Choices
+## 1. Architecture & Tech Stack
 
-To ensure a clean separation of concerns and a robust development experience, I adopted a **Monorepo Architecture** powered by **Turborepo** and **pnpm**. The project is split into three main packages:
+I went with a monorepo setup using Turborepo and pnpm to keep things organized. The project is split into three main parts:
 
-- **Frontend (`web/apps/web`):** Built with **Next.js**. It provides a highly interactive and responsive user interface. For styling and UI components, I utilized a shared component library built on top of Tailwind CSS and Radix UI primitives (similar to shadcn/ui), ensuring accessible and visually consistent components.
-- **Backend (`web/apps/api`):** Built with **Express.js**. Initially, Next.js API routes might seem sufficient, but extracting the backend to a dedicated Express server allowed for a more traditional layered architecture (Controllers -> Services -> Data/Repository). This decoupled architecture improves testability and prepares the system for independent scaling.
-- **Shared Types & UI (`web/packages/*`):** A critical architectural choice was to share TypeScript definitions and UI components across the monorepo. This prevents duplication and ensures the frontend and backend are always in sync regarding data contracts (e.g., Alert schemas).
+- **Frontend (`web/apps/web`):** Built with Next.js. For the UI, I used shadcn/ui and Tailwind CSS. It gave me a quick way to build clean, consistent components without writing everything from scratch.
+- **Backend (`web/apps/api`):** I ended up using Express.js. While Next.js API routes are great, pulling the backend out into its own Express app felt like the right move for a more traditional setup (Controllers -> Services -> Data). It's easier to test and scale this way.
+- **Shared Types (`web/packages/*`):** One of the biggest wins of the monorepo is sharing TypeScript types and UI components across the stack. It ensures the frontend and backend are on the same page when it comes to the data structures.
 
-**Database & ORM:** I utilized **Prisma** with an **in-memory SQLite** database. This provided type-safe queries and rapid iteration while requiring zero external dependencies to run the project.
+For the database, I went with Prisma and an in-memory SQLite setup. It keeps things simple for anyone running the project locally—no extra Docker containers or Postgres setups required. 
 
-**Authentication:** Implemented a secure, standard approach using **JWTs stored in HTTP-only cookies**. This prevents XSS attacks from easily accessing the token while maintaining a smooth session experience.
+For auth, I stuck to the basics: JWTs stored in HTTP-only cookies. It's a standard and secure way to handle sessions without exposing tokens to XSS.
 
-### Data Generation Approach
-The dataset is generated dynamically upon the backend server's startup via a custom script (`web/apps/api/prisma/seed.ts`). I intentionally avoided static JSON files or LLM generation at runtime. Instead, the script uses **weighted randomization** to accurately simulate a SOC environment (e.g., generating a long tail of 'info'/'low' alerts and rare 'critical' alerts). It selects from various attack templates (Malware, Phishing, Unauthorized Access) and generates deeply nested, realistic `raw_event` JSON payloads complete with randomized IPs, hostnames, and domains. Exactly 1000 records are seeded on every fresh start.
+### Generating the Data
+I wrote a seed script (`web/apps/api/prisma/seed.ts`) that runs when the backend starts. It uses weighted random generation to build out 1000 realistic alerts. You'll see a lot of 'info' and 'low' severity stuff, and only a few 'critical' alerts, which is pretty typical for a SOC. The script also builds out the `raw_event` JSON payloads with randomized IPs and domains.
 
 ---
 
 ## 2. What I Built vs. What I Cut
 
-**Built:**
-- **Robust API:** Fully paginated, sortable, and filterable endpoints with rigorous payload validation using **Zod**. 
-- **Headless UI Architecture:** The complex state management for the Dashboard, Alerts List, and Alert Details views was extracted into custom React hooks (`useAlerts`, `useAlertDetail`). This decouples data fetching, filtering, and side effects from the visual representation.
-- **Polished UI/UX:** Implemented skeleton loading states, informative empty states, seamless error handling, URL-synced filters (making views shareable), and a collapsible, syntax-highlighted JSON viewer for raw events.
-- **Actionable Details:** A split-view Alert Detail pane that allows an analyst to quickly change severity/status, assign themselves, or execute a one-click "False Positive" dismissal.
+**What made it in:**
+- **API:** Standard REST endpoints that handle pagination, sorting, and filtering. Used Zod for validation.
+- **Headless UI:** I pulled a lot of the complex state logic for the dashboard and alert lists into custom hooks (`useAlerts`, `useAlertDetail`). It keeps the components clean and separates the data fetching from the visuals.
+- **UI Details:** Added things like loading skeletons, empty states, and error handling. Filters sync to the URL so you can share links to specific views. There's also a syntax-highlighted JSON viewer for digging into the raw events.
+- **Triage Workflow:** The alert detail view is split so an analyst can review the raw event on one side while updating the status or severity on the other, or just one-click dismiss it as a false positive.
 
-**Cut (Given the 6-8 hr constraint):**
-- **Real-time updates:** Polling or WebSockets were omitted in favor of standard refetching upon actions.
-- **Bulk Actions:** While the table is robust, selecting multiple rows to dismiss them simultaneously was cut to prioritize the core single-alert triage experience.
-- **Automated Tests:** Comprehensive unit and e2e testing was scoped out to focus on architecture and product completeness.
-- **Complex Charting:** The dashboard focuses on clean, aggregated summary statistics and distribution bars rather than implementing a heavy charting library for timeline trends.
-
----
-
-## 3. Key Trade-offs and Decisions
-
-- **In-Memory SQLite vs. Persistent DB (PostgreSQL):** I chose an in-memory database to make the assessment incredibly easy to evaluate and run locally. The trade-off is that data mutations (like changing an alert's status) do not survive a server restart. In a production environment, simply changing the Prisma provider to Postgres would resolve this.
-- **Express vs. Next.js Route Handlers:** I explicitly migrated the API out of Next.js into a standalone Express app. Next.js API routes are convenient, but mixing heavy backend business logic (like layered services) into a frontend framework can become unwieldy. The trade-off was increased deployment complexity (deploying on Vercel *and* Render), but the architectural cleanliness was worth it.
-- **URL State Syncing:** I decided to sync list filters (severity, status, pagination) to the URL search parameters. This requires slightly more complex state management hook logic but creates a significantly better UX, as analysts can bookmark or share specific filtered views with their peers.
+**What I skipped (due to time):**
+- **Real-time updates:** Didn't have time for WebSockets, so you'll have to rely on standard refetching for now.
+- **Bulk actions:** The table is nice, but bulk-selecting rows to update them all at once was cut. I focused on getting the single-alert flow right first.
+- **Automated tests:** Skipped writing unit and e2e tests to prioritize getting the core app functional.
+- **Complex charts:** Kept the dashboard simple with summary stats rather than wiring up a heavy charting library.
 
 ---
 
-## 4. What I'd Tackle Next With More Time
+## 3. Trade-offs
 
-1. **Real-time Engine:** I would integrate WebSockets (or Server-Sent Events) so that when a new alert is generated by a detection system, it instantly appears on the analyst's dashboard without requiring a page refresh.
-2. **PostgreSQL Persistence:** Swap the SQLite in-memory database for a managed PostgreSQL instance to persist state across sessions and deployments.
-3. **Advanced Triage Workflows:** Implement bulk actions (e.g., selecting 50 "low" severity firewall alerts and marking them all as false positives at once).
-4. **End-to-End Testing:** Add Playwright to ensure the critical paths (login -> filter alerts -> view details -> resolve alert) remain unbroken.
+- **In-Memory SQLite vs. Postgres:** SQLite made it easy to package the app, but any changes (like updating an alert status) reset when the server restarts. In the real world, this would just be a Postgres database.
+- **Express vs. Next.js backend:** Moving to Express added some deployment overhead (I had to deploy to both Vercel and Render), but it kept the backend code much cleaner than trying to cram all the business logic into Next.js API routes.
+- **URL State Syncing:** Syncing state to the URL adds a bit of complexity to the React side of things, but it's a huge UX improvement since users can bookmark or share their current view.
 
 ---
 
-## 5. Reflections
+## 4. Future Improvements
 
-**What I'm proud of:**
-I am particularly proud of the **Headless Component Architecture** and the **Monorepo setup**. By extracting complex logic into hooks and sharing types globally between the Next.js frontend and Express backend, the codebase remains incredibly readable and maintainable. The split-view Alert Detail interface also feels very premium and highly practical for an analyst who needs to reference JSON data while simultaneously updating alert statuses.
+If I had a few more hours, here's what I'd tackle:
+1. **WebSockets:** Getting alerts to push to the client in real-time as they're generated.
+2. **Persistent Database:** Swapping SQLite for a real Postgres instance so data changes stick around.
+3. **Bulk Actions:** Letting analysts resolve dozens of low-priority alerts with a single click.
+4. **End-to-End Tests:** Adding Playwright to cover the main happy paths (login, filter, resolve alert).
 
-**What didn't go as hoped:**
-Deploying the standalone Express app in a monorepo setup to free-tier cloud providers presented minor friction (specifically getting build drivers on platforms like Railway/Render to recognize the sub-directory build steps). It took a bit of extra configuration time that I would have rather spent building out a timeline chart for the dashboard. However, resolving it resulted in a much cleaner overall deployment architecture.
+---
+
+## 5. Final Thoughts
+
+I'm pretty happy with how the headless component setup and the monorepo turned out. Extracting that logic into hooks made the codebase a lot easier to manage, and sharing types between the frontend and backend is always a win. The split-view for the alert details also ended up feeling really nice for quick triaging.
+
+The only real bump in the road was getting the Express app to deploy smoothly in the monorepo setup on the free-tier platforms. It took some fiddling with build commands that ate up time I would have rather spent building out a timeline chart, but in the end, having a decoupled backend was worth the hassle.
