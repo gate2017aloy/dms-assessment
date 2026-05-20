@@ -12,13 +12,6 @@
     "format": "turbo format",
     "typecheck": "turbo typecheck"
   },
-    "build": "pnpm --filter api build",
-    "start": "pnpm --filter api start",
-    "dev": "turbo dev",
-    "lint": "turbo lint",
-    "format": "turbo format",
-    "typecheck": "turbo typecheck"
-  },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
