@@ -1,6 +1,11 @@
 import { PrismaClient, Severity, Status, Category } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = 'file::memory:?cache=shared';
+}
+
+
 const HOSTNAMES = [
   'finance-laptop-22', 'dev-workstation-89', 'hr-pc-04', 'sales-macbook-15',
   'prod-db-master', 'web-server-01', 'auth-service-pod', 'corp-mail-server',
